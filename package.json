@@ -1,6 +1,6 @@
 {
     "name": "windy-plugin-osc-rdr",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "description": "Show the tracks and data of the Route du Rhum 2024",
     "main": "dist/plugin.js",
     "scripts": {
@@ -10,10 +10,11 @@
         "test": "node ./test/prepublish.js"
     },
     "repository": {
-        "type": "npm/npm"
+        "type": "git",
+        "url": "https://github.com/devpotion/windy-plugin-osc-rdr"
     },
     "author": "Julien Hatin",
-    "license": "UNLICENSED",
+    "license": "MIT",
     "dependencies": {
         "@babel/core": "^7.1.2",
         "@babel/preset-env": "^7.1.0",
