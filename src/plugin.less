@@ -1,0 +1,395 @@
+@import 'dev/variables.less';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@widthOfMyPlugin: 539px;
+
+@pluginName: osc-rdr;
+
+.onwindy-plugin-@{pluginName} {
+    .left-border {
+        left: @widthOfMyPlugin;
+    }
+
+    #search {
+        display: none;
+    }
+}
+
+#osc-settings {
+    font-weight: bold;
+    display: inline-block;
+    padding: 8px;
+    font-size: 1em;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    color: black;
+}
+
+#windy-plugin-@{pluginName} {
+    width: @widthOfMyPlugin;
+    height: 100%; //required to show the plugin in desktop
+
+
+    .red {
+        color: #CB7575;
+    }
+
+    .full {
+        width: 100%;
+    }
+
+    .green {
+        color: #80FF8C;
+    }
+
+    .b-g {
+        background-color: #fff;
+    }
+
+    .close-infos {
+        margin-top: 4px;
+        margin-right: 15px;
+        float: right;
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 18px;
+        line-height: 22px;
+
+        /* identical to box height */
+        display: flex;
+        align-items: center;
+
+        color: #FFFFFF;
+    }
+
+    .infos {
+        margin-top: 8px;
+        margin-left: 15px;
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 11.5px;
+        line-height: 13px;
+        display: flex;
+        align-items: center;
+        letter-spacing: 0.03em;
+
+        color: #FFFFFF;
+    }
+
+    #ranking {
+        margin-top: 15px;
+    }
+
+    .credits {
+        height: 112px;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-family: 'Roboto', serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 8px;
+        text-align: center;
+        color: #FFFFFF;
+    }
+
+    .mainStats {
+        height: 112px;
+        text-align: left;
+        background: rgba(0, 0, 0, 0.75);
+        margin-right: 5px;
+    }
+
+    .textSpeed {
+        margin-left: 14px;
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 16px;
+        text-align: left;
+        color: #FFFFFF;
+        padding-top: 4px;
+        padding-bottom: 10px;
+    }
+
+    .rank {
+        margin-left: 25px;
+        margin-right: 10px;
+    }
+
+    .rankNumber {
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 60px;
+        line-height: 54px;
+        text-align: center;
+        color: #FFFFFF;
+    }
+
+    .rankSpeed {
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 18px;
+        align-items: center;
+        text-align: center;
+        color: #FFFFFF;
+    }
+
+    .progress {
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 36px;
+        line-height: 32px;
+        text-align: center;
+        padding: 0;
+        margin-bottom: 0;
+        color: #FFFFFF;
+    }
+
+    .inline-block {
+        display: inline-block;
+    }
+
+    .tag {
+        border: none;
+        padding: 2px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+
+    .icon {
+        height: 40px;
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 13px;
+        line-height: 16px;
+        align-items: center;
+        text-align: center;
+        padding-top: 12px;
+        color: #FFFFFF;
+    }
+
+    .m-t {
+        margin-top: 3px
+    }
+
+    .m-l {
+        margin-left: 8px;
+    }
+
+    .m-b {
+        margin-bottom: 8px;
+    }
+
+    .unit {
+        font-style: normal;
+        font-weight: 800;
+        font-size: 8px;
+    }
+
+    .secondRow {
+        max-width: @widthOfMyPlugin;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .data-container {
+        height: 116px;
+        margin-top: 8px;
+        margin-left: 10px;
+        color: #ffffff;
+
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 18px;
+
+        /* identical to box height */
+        align-items: center;
+
+        background: rgba(0, 0, 0, 0.25);
+    }
+
+    .data-legend {
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 800;
+        font-size: 8px;
+        line-height: 10px;
+        align-items: center;
+        text-align: center;
+
+        color: #FFFFFF;
+    }
+
+    .selected {
+        color: #FBDD00;
+    }
+
+    .icon:hover {
+        color: #FBDD00;
+    }
+
+    .all {
+        background-color: #00696d;
+    }
+
+    .class40 {
+        background-color: #fead20;
+    }
+
+    .imoca {
+         background-color: #28dbc6;
+    }
+
+    .multi50 {
+        background-color: #1CAAE6;
+    }
+
+    .ultim {
+        background-color: #135184;
+    }
+
+    .mono {
+        background-color: #fe5858;
+    }
+
+    .multi {
+        background-color: #5b5b5b;
+    }
+
+    .grid-2 {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .firstRow {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 6px 112px 112px 1fr;
+    }
+
+    .grid-3 {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .grid-4 {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+
+    .grid-6 {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+
+    .grid-7 {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+
+    .uline {
+        border-bottom: 1px solid #6b6b6b;
+    }
+
+    .section-title {
+        text-align: center;
+    }
+
+    .plugin-content {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        background: rgba(0, 0, 0, 0.5);;
+    }
+}
+
+#device-mobile {
+    #open-in-app {
+        display: none;
+    }
+
+    .m-l {
+        margin-left: 0px;
+    }
+
+    .textSpeed {
+        margin-left: 8px;
+        font-family: 'Montserrat', serif;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 12px;
+        text-align: left;
+        color: #FFFFFF;
+        padding-top: 2px;
+        padding-bottom: 5px;
+    }
+
+    .onwindy-plugin-@{pluginName} {
+        #bottom {
+            left: 0; // this keeps the  calendar bar visible
+            z-index: 20;
+
+        }
+    }
+
+    #windy-plugin-@{pluginName} {
+        .section-title {
+            display: none;
+        }
+
+        bottom: 60px; //set bottom so that calendar remains visible.
+        height: auto; //cancel set height so that bottom can be used;
+        width: 100%;
+        transition: bottom 0.3s;
+        z-index: 10;
+
+        .calendar-backdrop {
+            bottom: 0;
+            height: 40px;
+            width: 100%;
+            position: absolute;
+            overflow: hidden;
+        }
+    }
+
+    .mobile-calendar-expanded {
+        #windy-plugin-@{pluginName} {
+            bottom: 100px;
+        }
+    }
+
+}
+
+#device-tablet {
+    .onwindy-plugin-@{pluginName} {
+        // Place the left margin of the bottom calendar in a sensible position
+        #bottom {
+            margin-left: @widthOfMyPlugin;
+        }
+    }
+
+    // Put logo in a better position on tablet,  otherwise over the left pane title.
+    #logo {
+        left: 100%;
+        margin-left: 150px;
+    }
+
+    #open-in-app {
+        display: none;
+    }
+}

@@ -1,0 +1,565 @@
+<plugin>
+    <div class="mobile-header">
+        <!-- mobile header is only displayed when scrolling -->
+    </div>
+    <div class="plugin-content">
+        <div class="content">
+            <div id="menu" class="grid-7">
+                <div id="ALL" class="icon all"><a onclick="load('ALL')">TOUS</a></div>
+                <div id="IMOCA" class="icon imoca selected"><a onclick="load('IMOCA')">IMOCA</a></div>
+                <div id="ULTIMES" class="icon ultim"><a onclick="load('ULTIMES')">ULTIM</a></div>
+                <div id="CLASS40" class="icon class40"><a onclick="load('CLASS 40')">CLASS40</a></div>
+                <div id="MULTI50" class="icon multi50"><a onclick="load('MULTI 50')">OCEAN50</a></div>
+                <div id="RHUMMONO" class="icon mono"><a onclick="load('RHUM MONO')">MONO</a></div>
+                <div id="RHUMMULTI" class="icon multi"><a onclick="load('RHUM MULTI')">MULTI</a></div>
+            </div>
+            <div id="osc-credits" class="infos">
+                PLUGIN OFFSHORE SOCIAL CLUB BY DEVPOTION SUR UNE IDÉE DE RÉGADATA
+            </div>
+            <div id="ranking">
+                <div id="ranking-container"></div>
+            </div>
+        </div>
+
+
+    </div>
+    <script>
+        import {$} from '@windy/utils';
+        import * as rs from '@windy/rootScope';
+        import ib from "@windy/windy-plugin-module-infobox";
+
+        let en = {
+            "rankings": "Rankings",
+            "credits": "Offshore Social Club Plugin by Devpotion on a idea from Regadata",
+            "next": "NEXT",
+            "finish": "FINISH",
+            "leader": "LEADER",
+            "all": "All"
+        };
+
+        let fr = {
+            "rankings": "Classement",
+            "credits": "Plugin Offshore Social Club by Devpotion sur une idée de Regadata",
+            "next": "SUIVANT",
+            "finish": "ARRIVÉE",
+            "leader": "LEADER",
+            "all": "Tout"
+        };
+
+        const getLanguage = () => navigator.userLanguage || (navigator.languages && navigator.languages.length && navigator.languages[0]) || navigator.language || navigator.browserLanguage || navigator.systemLanguage || 'en';
+
+        let locale = getLanguage();
+        const setTranslations = (locale) => {
+            if (locale === 'en') {
+                return fr;
+            } else {
+                return en;
+            }
+        };
+
+        const translations = setTranslations(locale);
+
+        const i18n = (key) => {
+            return translations[key];
+        };
+
+        $('#osc-credits').innerText = i18n('credits');
+
+        //box lower left screen with buttons etc,   moves with the calendar.
+        this.refs.infobox = ib(
+            //html to fill the info box:
+            "<div id='osc-settings'><i class=\"bi bi-list\"></i> " + i18n('rankings') + "</div>"
+            , "osc-settings" //id of the button which will open the left hand pane
+            , this //this plugin ref
+            , true //true=hide this box when plugin opens
+        );
+
+        // LastOpened set to true when plugin opens,  use to determine whether picker (or other actions) should be active.
+        // will be set false by W.plugins.plugins,  when another windy-plugin- plugin opens
+        this.lastOpened = true;
+
+        // Add a slider for mobile:
+        if (rs.isMobile) {
+            // These properties have to be specified here,  but possibly in the future in the config file.
+            this.addMobileSlider = true;
+            this.closeOnSwipeDown = false;
+
+        }
+
+        // Here you can remove all the DOM and leaflet elements and unsubscribe for listeners,  when another external plugin is opened.
+        // The W.plugins.plugins looks for this fx in each of the loaded plugins.
+        this.onOtherPluginOpened = plugin => {
+            console.log(`This ${plugin} has opened`);
+        };
+
+        //---------------------------------------------------------------------------------------------------------------
+        //|                                                                                                             |
+        //|                                             We develop the libraries here                                      |
+        //|                                                                                                             |
+        //---------------------------------------------------------------------------------------------------------------
+
+        const baseUrl = 'https://analytics.devpotion.fr';
+
+        const marauders = () => {
+            return {
+                tracks: fetch(baseUrl + '/api/v1/tracks?' + Date.now().toString()).then(response => response.json())
+            };
+        };
+
+        const progressionColor = (progression) => {
+            if (progression <= -0.01) {
+                return 'red';
+            } else if (progression < 0.01) {
+                return 'white';
+            }
+            return 'green';
+        };
+
+
+        const progressionArrow = (progression) => {
+            if (progression < 0) {
+                return '<i class="green"><svg width="27" height="28" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<g transform="rotate(90 14 14)">' +
+                    '<path d="M1.81733 6.046L7.50133 0.245999L23.5093 3.61L26.8733 19.676L21.1313 25.476L17.1293 10.048L1.81733 6.046ZM0.0193284 21.126L15.1573 6.046L21.1313 12.136L6.05133 27.216L0.0193284 21.126Z" fill="white"/>' +
+                    '</g>' +
+                    '</svg>️</i>';
+            }
+            if (progression === 0) {
+                return '<i class="green"><svg width="27" height="28" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<g transform="rotate(45 14 14)">' +
+                    '<path d="M1.81733 6.046L7.50133 0.245999L23.5093 3.61L26.8733 19.676L21.1313 25.476L17.1293 10.048L1.81733 6.046ZM0.0193284 21.126L15.1573 6.046L21.1313 12.136L6.05133 27.216L0.0193284 21.126Z" fill="white"/>' +
+                    '</g>' +
+                    '</svg>️</i>';
+            }
+            return '<i class="green"><svg width="27" height="28" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<g transform="rotate(0)">' +
+                '<path d="M1.81733 6.046L7.50133 0.245999L23.5093 3.61L26.8733 19.676L21.1313 25.476L17.1293 10.048L1.81733 6.046ZM0.0193284 21.126L15.1573 6.046L21.1313 12.136L6.05133 27.216L0.0193284 21.126Z" fill="white"/>' +
+                '</g>' +
+                '</svg>️</i>';
+        };
+
+        var setSvgColorsUniqueID = 0;
+
+        function setSvgColors(color1, color2, svg) {
+            setSvgColorsUniqueID++;
+            return svg
+                .replace(':color1:', color1)
+                .replace(':color2:', color2)
+                .replaceAll(':uniqueId:', 'svgId' + setSvgColorsUniqueID);
+        }
+
+        function addPopup(text, layer) {
+            layer.bindPopup(text);
+
+            layer.on('mouseover', function (e) {
+                layer.setStyle({weight: 4});
+                this.openPopup(e.latlng);
+            });
+            layer.on('mouseout', function () {
+                layer.setStyle({weight: 2});
+                this.closePopup();
+            });
+        }
+
+        const findClosest = (points) => {
+            return points.reduce((pointA, pointB) => {
+                    let currentTimestamp = store.get('timestamp') / 1000;
+                    if (Math.abs(pointA.timestamp - currentTimestamp) < Math.abs(pointB.timestamp - currentTimestamp)) {
+                        return pointA;
+                    } else {
+                        return pointB;
+                    }
+                }
+            );
+        };
+
+        function pad(num, size) {
+            num = num.toString();
+            while (num.length < size) {
+                num = "0" + num;
+            }
+            return num;
+        }
+
+        const format = (number, pre, aft = 0, sign = true) => {
+            const n = Math.abs(number).toFixed(aft);
+            if (aft === 0) {
+                aft = -1;
+            }
+            if (number >= 0) {
+                if (sign) {
+                    return '+' + pad(n, pre + aft + 1);
+                } else {
+                    return pad(n, pre + aft + 1);
+                }
+            } else {
+                return '-' + pad(n, pre + aft + 1);
+            }
+        };
+
+        //---------------------------------------------------------------------------------------------------------------
+        //|                                                                                                             |
+        //|                                             We develop the plugin here                                      |
+        //|                                                                                                             |
+        //---------------------------------------------------------------------------------------------------------------
+
+        import {map} from '@windy/map';
+        import store from '@windy/store';
+
+        const IMOCASVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.4173 25C6.4173 25 0.217306 25 0.0173054 24.8C-0.182695 24.6 1.4173 11.8 1.4173 11.8C1.4173 11.8 2.8173 -4.92592e-07 6.40954 -1.12068e-06C10.0018 -1.74877e-06 11.4173 11.8 11.4173 11.8C11.4173 11.8 13.0173 24.6 12.8173 24.8C12.6173 25 6.4173 25 6.4173 25ZM10.7537 19.2402L10.7537 18.9941C10.7537 18.3223 10.6385 17.7187 10.408 17.1836C10.1776 16.6484 9.8514 16.1914 9.42952 15.8125C9.01155 15.4336 8.51546 15.1426 7.94124 14.9395C7.37093 14.7402 6.74202 14.6406 6.05452 14.6406L5.39827 14.6406C4.90609 14.6406 4.45296 14.7109 4.0389 14.8516C3.62484 14.9961 3.26741 15.2012 2.96663 15.4668C2.66585 15.7324 2.43148 16.0488 2.26351 16.416C2.09945 16.7871 2.01741 17.1992 2.01741 17.6523C2.01742 18.0898 2.09163 18.4844 2.24007 18.8359C2.38851 19.1875 2.59554 19.4883 2.86117 19.7383C3.12679 19.9922 3.43734 20.1855 3.79281 20.3184C4.14828 20.4551 4.53304 20.5234 4.9471 20.5234C5.34163 20.5234 5.71273 20.4727 6.06038 20.3711C6.40804 20.2695 6.71468 20.1172 6.98031 19.9141C7.24593 19.7109 7.45492 19.457 7.60726 19.1523C7.7596 18.8516 7.83577 18.502 7.83577 18.1035C7.83577 17.7402 7.77523 17.4141 7.65413 17.125C7.53695 16.8359 7.37288 16.5879 7.16195 16.3809C7.15642 16.3754 7.15086 16.37 7.14529 16.3647C7.36285 16.3955 7.56762 16.4458 7.7596 16.5156C8.10335 16.6445 8.39632 16.8281 8.63851 17.0664C8.8846 17.3086 9.07406 17.6035 9.20687 17.9512C9.33968 18.2988 9.40609 18.6953 9.40609 19.1406L9.40609 19.2402L10.7537 19.2402ZM5.71915 16.3281L5.18734 16.3281C4.88265 16.3281 4.61312 16.3574 4.37874 16.416C4.14827 16.4785 3.95491 16.5664 3.79866 16.6797C3.64632 16.7969 3.53109 16.9336 3.45296 17.0898C3.37874 17.2461 3.34163 17.4219 3.34163 17.6172C3.34163 17.8008 3.3807 17.9668 3.45882 18.1152C3.53695 18.2676 3.64632 18.3965 3.78695 18.502C3.93148 18.6113 4.09945 18.6934 4.29085 18.748C4.48616 18.8066 4.69906 18.8359 4.92952 18.8359C5.15999 18.8359 5.37288 18.8066 5.5682 18.748C5.76351 18.6934 5.93148 18.6113 6.0721 18.502C6.21663 18.3926 6.32796 18.2598 6.40609 18.1035C6.48421 17.9473 6.52327 17.7715 6.52327 17.5762C6.52327 17.3105 6.46077 17.0762 6.33577 16.873C6.21468 16.6738 6.05843 16.5176 5.86702 16.4043C5.81836 16.3755 5.76907 16.3501 5.71915 16.3281Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const IMOCAFOILSSVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 25C10 25 3.8 25 3.6 24.8C3.4 24.6 4.6 14.8 4.6 14.8C4.6 14.8 1.6 14.8 0 17.4C0 12.8 2.8 11.8 5 11.8C5 11.8 6.4 0 9.99224 0C13.5845 1.90735e-06 15 11.8 15 11.8C17.2 11.8 20 12.8 20 17.4C18.4 14.8 15.4 14.8 15.4 14.8C15.4 14.8 16.6 24.6 16.4 24.8C16.2 25 10 25 10 25ZM14.6191 19.2402V18.9941C14.6191 18.3223 14.5039 17.7188 14.2734 17.1836C14.043 16.6484 13.7168 16.1914 13.2949 15.8125C12.877 15.4336 12.3809 15.1426 11.8066 14.9395C11.2363 14.7402 10.6074 14.6406 9.91992 14.6406H9.26367C8.77149 14.6406 8.31836 14.7109 7.9043 14.8516C7.49024 14.9961 7.13281 15.2012 6.83203 15.4668C6.53125 15.7324 6.29688 16.0488 6.12891 16.416C5.96485 16.7871 5.88281 17.1992 5.88281 17.6523C5.88281 18.0898 5.95703 18.4844 6.10547 18.8359C6.25391 19.1875 6.46094 19.4883 6.72656 19.7383C6.99219 19.9922 7.30274 20.1855 7.65821 20.3184C8.01367 20.4551 8.39844 20.5234 8.8125 20.5234C9.20703 20.5234 9.57813 20.4727 9.92578 20.3711C10.2734 20.2695 10.5801 20.1172 10.8457 19.9141C11.1113 19.7109 11.3203 19.457 11.4727 19.1523C11.625 18.8516 11.7012 18.502 11.7012 18.1035C11.7012 17.7402 11.6406 17.4141 11.5195 17.125C11.4023 16.8359 11.2383 16.5879 11.0273 16.3809C11.0218 16.3754 11.0163 16.37 11.0107 16.3647C11.2283 16.3955 11.433 16.4458 11.625 16.5156C11.9688 16.6445 12.2617 16.8281 12.5039 17.0664C12.75 17.3086 12.9395 17.6035 13.0723 17.9512C13.2051 18.2988 13.2715 18.6953 13.2715 19.1406V19.2402H14.6191ZM9.58455 16.3281H9.05274C8.74805 16.3281 8.47852 16.3574 8.24414 16.416C8.01367 16.4785 7.82031 16.5664 7.66406 16.6797C7.51172 16.7969 7.39649 16.9336 7.31836 17.0898C7.24414 17.2461 7.20703 17.4219 7.20703 17.6172C7.20703 17.8008 7.2461 17.9668 7.32422 18.1152C7.40235 18.2676 7.51172 18.3965 7.65235 18.502C7.79688 18.6113 7.96485 18.6934 8.15625 18.748C8.35156 18.8066 8.56446 18.8359 8.79492 18.8359C9.02539 18.8359 9.23828 18.8066 9.4336 18.748C9.62891 18.6934 9.79688 18.6113 9.9375 18.502C10.082 18.3926 10.1934 18.2598 10.2715 18.1035C10.3496 17.9473 10.3887 17.7715 10.3887 17.5762C10.3887 17.3105 10.3262 17.0762 10.2012 16.873C10.0801 16.6738 9.92383 16.5176 9.73242 16.4043C9.68376 16.3755 9.63447 16.3501 9.58455 16.3281Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const CLASS40SVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.4173 25C6.4173 25 0.217306 25 0.0173054 24.8C-0.182695 24.6 1.4173 11.8 1.4173 11.8C1.4173 11.8 2.8173 -4.92592e-07 6.40954 -1.12068e-06C10.0018 -1.74877e-06 11.4173 11.8 11.4173 11.8C11.4173 11.8 13.0173 24.6 12.8173 24.8C12.6173 25 6.4173 25 6.4173 25ZM3.99788 20.6172L5.3221 20.6172L5.3221 19.6504L10.6659 19.6504L10.6659 19.2871L10.6659 17.9629L10.6659 17.9453L5.02327 14.3887L3.99788 14.4707L3.99788 17.9629L2.1346 17.9629L2.1346 19.6504L3.99788 19.6504L3.99788 20.6172ZM8.44992 17.9629L8.23421 17.834L5.3221 16.0645L5.3221 17.9629L8.44992 17.9629Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const RHUMMULTISVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M8.50738 -1.90735e-06C9.93672 -1.90735e-06 10.7235 6.49566 11.0343 9.84816C11.3428 6.49566 12.125 -1.90735e-06 13.5543 -1.90735e-06C15.4808 -1.90735e-06 16.2399 11.8 16.2399 11.8C16.2399 11.8 17.098 24.6 16.9907 24.8C16.8835 25 13.5585 25 13.5585 25C13.5585 25 12.0526 25 11.035 24.939C10.0174 25 8.51154 25 8.51154 25C8.51154 25 6.99426 25 5.97654 24.9383C4.95882 25 3.44154 25 3.44154 25C3.44154 25 0.116539 25 0.00928116 24.8C-0.0979767 24.6 0.760088 11.8 0.760088 11.8C0.760088 11.8 1.51089 -1.90735e-06 3.43738 -1.90735e-06C4.88482 -1.90735e-06 5.67327 6.6612 5.97589 9.97398C6.27618 6.6612 7.05994 -1.90735e-06 8.50738 -1.90735e-06ZM12.7312 17.5996V14.418L4.2 14.418V16.1758H7.3582V17.5719L4.2 19.1875V21.0684H4.28203L7.78275 19.2218C7.89022 19.4603 8.01824 19.6754 8.1668 19.8672C8.38555 20.1484 8.65703 20.3652 8.98125 20.5176C9.30937 20.6738 9.70195 20.752 10.159 20.752C10.7176 20.752 11.1883 20.625 11.5711 20.3711C11.9539 20.1172 12.243 19.7539 12.4383 19.2812C12.6336 18.8125 12.7312 18.252 12.7312 17.5996ZM8.7293 16.1758V17.6113C8.7293 17.9199 8.78398 18.1758 8.89336 18.3789C9.00273 18.582 9.15508 18.7344 9.35039 18.8359C9.5457 18.9414 9.77226 18.9941 10.0301 18.9941C10.3035 18.9941 10.5398 18.9434 10.7391 18.8418C10.9383 18.7402 11.0906 18.5859 11.1961 18.3789C11.3016 18.1719 11.3543 17.9121 11.3543 17.5996V16.1758H8.7293Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const RHUMMONOSVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.7173 25C6.7173 25 0.517299 25 0.317298 24.8C0.117298 24.6 1.7173 11.8 1.7173 11.8C1.7173 11.8 3.1173 0 6.70954 0C10.3018 0 11.7173 11.8 11.7173 11.8C11.7173 11.8 13.3173 24.6 13.1173 24.8C12.9173 25 6.7173 25 6.7173 25ZM10.9658 17.5996L10.9658 14.418L2.43459 14.418V16.1758H5.5928V17.5719L2.43459 19.1875V21.0684H2.51663L6.01735 19.2218C6.12482 19.4603 6.25283 19.6754 6.40139 19.8672C6.62014 20.1484 6.89163 20.3652 7.21584 20.5176C7.54397 20.6738 7.93655 20.752 8.39358 20.752C8.95217 20.752 9.42288 20.625 9.80569 20.3711C10.1885 20.1172 10.4776 19.7539 10.6729 19.2812C10.8682 18.8125 10.9658 18.252 10.9658 17.5996ZM6.96389 16.1758V17.6113C6.96389 17.9199 7.01858 18.1758 7.12795 18.3789C7.23733 18.582 7.38967 18.7344 7.58498 18.8359C7.7803 18.9414 8.00686 18.9941 8.26467 18.9941C8.53811 18.9941 8.77444 18.9434 8.97366 18.8418C9.17288 18.7402 9.32522 18.5859 9.43069 18.3789C9.53616 18.1719 9.58889 17.9121 9.58889 17.5996V16.1758H6.96389Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const ULTIMSVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.9759 9.97398C5.67328 6.66121 4.88482 -1.90735e-06 3.43738 -1.90735e-06C1.51089 -1.90735e-06 0.760092 11.8 0.760092 11.8C0.760092 11.8 -0.0979786 24.6 0.00928307 24.8C0.116545 25 3.44154 25 3.44154 25C3.44154 25 4.95881 25 5.97653 24.9383C6.99425 25 8.51154 25 8.51154 25C8.51154 25 10.0174 25 11.035 24.939C12.0526 25 13.5585 25 13.5585 25C13.5585 25 16.8835 25 16.9907 24.8C17.098 24.6 16.2399 11.8 16.2399 11.8C16.2399 11.8 15.4808 -1.90735e-06 13.5543 -1.90735e-06C12.125 -1.90735e-06 11.3428 6.49566 11.0343 9.84816C10.7235 6.49566 9.93672 0 8.50738 0C7.05994 0 6.27618 6.66121 5.9759 9.97398ZM12.7313 20.7695V19.0176H7.09454C6.71173 19.0176 6.39923 18.957 6.15704 18.8359C5.91485 18.7188 5.73712 18.5469 5.62383 18.3203C5.51055 18.0977 5.45391 17.8262 5.45391 17.5059C5.45391 17.1934 5.51055 16.9219 5.62383 16.6914C5.73712 16.4648 5.91485 16.291 6.15704 16.1699C6.39923 16.0488 6.71173 15.9883 7.09454 15.9883L12.7313 15.9883V14.2305L7.09454 14.2305C6.43829 14.2305 5.88555 14.3691 5.43633 14.6465C4.98712 14.9277 4.64923 15.3145 4.42266 15.8066C4.1961 16.3027 4.08282 16.8691 4.08282 17.5059C4.08282 18.1426 4.1961 18.7051 4.42266 19.1934C4.64923 19.6855 4.98712 20.0703 5.43633 20.3477C5.88555 20.6289 6.43829 20.7695 7.09454 20.7695H12.7313Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        const MULTI50SVG = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="20.000000pt" height="25.000000pt" viewBox="0 0 20.000000 25.000000" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id=":uniqueId:" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" style="stop-color:hsl(:color1:, 100%, 45%);stop-opacity:1" />
+                                  <stop offset="100%" style="stop-color:hsl(:color2:, 100%, 45%);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M8.50738 -1.90735e-06C9.93672 -1.90735e-06 10.7235 6.49566 11.0343 9.84816C11.3428 6.49566 12.125 -1.90735e-06 13.5543 -1.90735e-06C15.4808 -1.90735e-06 16.2399 11.8 16.2399 11.8C16.2399 11.8 17.098 24.6 16.9907 24.8C16.8835 25 13.5585 25 13.5585 25C13.5585 25 12.0526 25 11.035 24.939C10.0174 25 8.51154 25 8.51154 25C8.51154 25 6.99426 25 5.97654 24.9383C4.95882 25 3.44154 25 3.44154 25C3.44154 25 0.116539 25 0.00928116 24.8C-0.0979767 24.6 0.760088 11.8 0.760088 11.8C0.760088 11.8 1.51089 -1.90735e-06 3.43738 -1.90735e-06C4.88482 -1.90735e-06 5.67327 6.6612 5.97589 9.97398C6.27618 6.6612 7.05994 -1.90735e-06 8.50738 -1.90735e-06ZM8.40703 14.8809L8.08476 16.2285C8.20976 16.3418 8.32109 16.4824 8.41875 16.6504C8.51641 16.8223 8.56523 17.0645 8.56523 17.377C8.56523 17.6074 8.52812 17.8086 8.45391 17.9805C8.37969 18.1562 8.27422 18.3008 8.1375 18.4141C8.00078 18.5273 7.83867 18.6113 7.65117 18.666C7.46367 18.7207 7.25469 18.748 7.02422 18.748C6.79375 18.748 6.57891 18.7246 6.37969 18.6777C6.18437 18.6348 6.0125 18.5664 5.86406 18.4727C5.71953 18.3789 5.60625 18.2559 5.52422 18.1035C5.44219 17.9512 5.40117 17.7676 5.40117 17.5527C5.40117 17.3223 5.44805 17.1211 5.5418 16.9492C5.63555 16.7773 5.76836 16.6387 5.94023 16.5332C6.11601 16.4316 6.325 16.3691 6.56719 16.3457V14.6699C6.17266 14.6777 5.82109 14.7617 5.5125 14.9219C5.20781 15.0859 4.94805 15.3027 4.7332 15.5723C4.51836 15.8457 4.35625 16.1523 4.24687 16.4922C4.1375 16.8359 4.08281 17.1914 4.08281 17.5586C4.08281 18.0508 4.15898 18.4766 4.31133 18.8359C4.46367 19.1953 4.67266 19.4941 4.93828 19.7324C5.20781 19.9707 5.5125 20.1484 5.85234 20.2656C6.19609 20.3828 6.55742 20.4414 6.93633 20.4414C7.38555 20.4414 7.78789 20.3828 8.14336 20.2656C8.49883 20.1484 8.79961 19.9766 9.0457 19.75C9.2918 19.5273 9.4793 19.2559 9.6082 18.9355C9.73711 18.6152 9.80156 18.248 9.80156 17.834C9.80156 17.5488 9.7625 17.291 9.68437 17.0605C9.61015 16.8301 9.53984 16.6582 9.47344 16.5449L11.366 16.7559V20.1602H12.7312V15.3672L8.40703 14.8809Z" fill="url(#:uniqueId:)"/>
+                            </svg>`;
+
+        let data = [],
+            markers = [],
+            lines = [],
+            routings = [],
+            routingMarkers = [];
+
+        window.markers = markers;
+
+        let currentClass = 'IMOCA';
+
+        const updateIconStyle = () => {
+            for (const marker of markers) {
+                if (marker._icon) {
+                    marker._icon.style.transformOrigin = '12px 12px';
+                    const heading = marker._icon.getAttribute('data-heading');
+                    if (marker._icon.style.transform.indexOf('rotateZ') === -1) {
+                        marker._icon.style.transform = `${marker._icon.style.transform} rotateZ(${
+                            heading || 0
+                        }deg)`;
+                    }
+                }
+            }
+        };
+
+        const generateBoatIcon = (boatClass, hasFoil, hue) => {
+
+            if (boatClass === 'IMOCA') {
+                if (hasFoil) {
+                    return L.divIcon({
+                        html: setSvgColors(hue, hue - 30, IMOCAFOILSSVG),
+                        iconSize: [20, 25],
+                        iconAnchor: [10, 12],
+                    });
+                } else {
+                    return L.divIcon({
+                        html: setSvgColors(hue, hue - 30, IMOCASVG),
+                        iconSize: [20, 25],
+                        iconAnchor: [10, 12],
+                    });
+                }
+            }
+
+            if (boatClass === 'ULTIMES') {
+                return L.divIcon({
+                    html: setSvgColors(hue, hue - 30, ULTIMSVG),
+                    iconSize: [20, 25],
+                    iconAnchor: [10, 12],
+                });
+            }
+
+            if (boatClass === 'CLASS 40') {
+                return L.divIcon({
+                    html: setSvgColors(hue, hue - 30, CLASS40SVG),
+                    iconSize: [20, 25],
+                    iconAnchor: [10, 12],
+                });
+            }
+
+            if (boatClass === 'MULTI 50') {
+                return L.divIcon({
+                    html: setSvgColors(hue, hue - 30, MULTI50SVG),
+                    iconSize: [20, 25],
+                    iconAnchor: [10, 12],
+                });
+            }
+
+            if (boatClass === 'RHUM MONO') {
+                return L.divIcon({
+                    html: setSvgColors(hue, hue - 30, RHUMMONOSVG),
+                    iconSize: [20, 25],
+                    iconAnchor: [10, 12],
+                });
+            }
+
+            return L.divIcon({
+                html: setSvgColors(hue, hue - 30, RHUMMULTISVG),
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+            });
+        };
+
+        const update = (boatClass) => {
+            $("#" + currentClass.replaceAll(" ", "")).classList.remove("selected");
+            currentClass = boatClass;
+            $("#" + currentClass.replaceAll(" ", "")).classList.add("selected");
+            console.log($("#" + currentClass.replaceAll(" ", "")).classList);
+            let hue = 0;
+            markers.forEach(marker => marker.removeFrom(map));
+            lines.forEach(l => l.removeFrom(map));
+            routings.forEach(l => l.removeFrom(map));
+            routingMarkers.forEach(l => l.removeFrom(map));
+
+            const $ranking = $('#ranking');
+            let $rankingContainer = $('#ranking-container');
+            $rankingContainer.remove();
+            $ranking.insertAdjacentHTML('beforeend', '<div id="ranking-container"></div>');
+            $rankingContainer = $('#ranking-container');
+
+            for (const trackInfos of data) {
+
+                if ((trackInfos.track.length > 0 && trackInfos.boatEntry.boatClass === boatClass) || boatClass === 'ALL') {
+                    hue = (hue + 30) % 360;
+
+                    let track = trackInfos.track.map(point => [point.lat, point.lon]);
+                    let routing = trackInfos.routing.map(point => [point.lat, point.lon]);
+
+                    const rLayer = L.polyline(routing, {
+                        color: `hsl(${hue}, 50%, 45%)`,
+                        dashArray: "30 10",
+                        weight: 2,
+                    }).addTo(map);
+
+                    if (trackInfos.routing.length > 0) {
+                        let rPosition = findClosest(trackInfos.routing);
+                        const rMarker = L.marker([rPosition.lat, rPosition.lon], {
+                            icon: generateBoatIcon('ROUTING', trackInfos.boatEntry.foils, hue),
+                        }).addTo(map);
+                        routingMarkers.push(rMarker);
+                    }
+
+                    const layer = L.polyline(track, {
+                        color: `hsl(${hue}, 100%, 45%)`,
+                        weight: 2,
+                    }).addTo(map);
+
+                    addPopup(trackInfos.boatEntry.boat, layer);
+                    addPopup(trackInfos.boatEntry.boat, rLayer);
+
+                    const marker = L.marker(trackInfos.track[0], {
+                        icon: generateBoatIcon(trackInfos.boatEntry.boatClass, trackInfos.boatEntry.foils, hue),
+                    }).addTo(map);
+
+                    markers.push(marker);
+                    marker._icon.setAttribute('data-heading', trackInfos.boatEntry.ptToPtHeading);
+                    marker._icon.setAttribute('boat-name', trackInfos.boatEntry.boat);
+                    marker._icon.setAttribute('boat-class', trackInfos.boatEntry.boatClass);
+                    marker.bindPopup(trackInfos.boatEntry.boat);
+
+
+                    lines.push(layer);
+                    routings.push(rLayer);
+
+                    updateIconStyle();
+
+                    let rank = trackInfos.boatEntry;
+
+                    let id = '' + (markers.length - 1);
+
+                    const template = '<a onclick="markers[' + id + '].openPopup()"><div class="firstRow">' +
+                        '                        <div class="credits inline-block">' + rank.credits + '</div>' +
+                        '                        <div class="profilePic inline-block"><img src="' + rank.skipperPicture + '"></div>' +
+                        '                        <div class="rank inline-block">' +
+                        '                            <div class="rankNumber">' + rank.rank + '</div>' +
+                        '                            <div class="rankSpeed">' + format(rank.ptToPtSpeed, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                            <div class="progress">' + progressionArrow(rank.rankChange) + '</div>' +
+                        '                        </div>' +
+                        '                        <div class="mainStats inline-block">' +
+                        '                            <div class="textSpeed m-t">' + i18n('next') + ' : ' + new Intl.NumberFormat('fr-FR').format(rank.gapPrevious) + '<i class="unit">NM</i> <i class="' + progressionColor(-rank.gapPreviousChange) + '">' + rank.gapPreviousChange.toFixed(2) + ' NM</i></div>' +
+                        '                            <div class="textSpeed">' + i18n('finish') + ' : ' + new Intl.NumberFormat('fr-FR').format(rank.distFinish) + '<i class="unit">NM</i> <i class="' + progressionColor(-rank.distFinishChange) + '">' + rank.distFinishChange.toFixed(2) + ' NM</i></div>' +
+                        '                            <div class="textSpeed">' + i18n('leader') + ' : ' + new Intl.NumberFormat('fr-FR').format(rank.gapLeader) + '<i class="unit">NM</i> <i class="' + progressionColor(-rank.gapLeaderChange) + '">' + rank.gapLeaderChange.toFixed(2) + ' NM</i></div>' +
+                        '                        </div>' +
+                        '                    </div>' +
+                        '                    <div class="secondRow">' +
+                        '                        <div class="grid-3">' +
+                        '                            <div class="data-container">' +
+                        '                                <div class="grid-2 m-t m-b m-l">' +
+                        '                                    <div>' + format(rank.ptToPtSpeed, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.ptToPtChange) + '">' + format(rank.ptToPtChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.fourHSpeed, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.fourHourChange) + '">' + format(rank.fourHourChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.twentyFourHourSpeed, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.twentyFourHourChange) + '">' + format(rank.twentyFourHourChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-l">' +
+                        '                                    <div>' + format(rank.totalSpeed, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.totalChange) + '">' + format(rank.totalChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                            </div>' +
+                        '                            <div class="data-container">' +
+                        '                                <div class="grid-2 m-t m-b m-l">' +
+                        '                                    <div>' + format(rank.ptToPtVmc, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.ptToPtVmcChange) + '">' + format(rank.ptToPtVmcChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.fourHourVmc, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.fourHourVmcChange) + '">' + format(rank.fourHourVmcChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.twentyFourHourVmc, 2, 1, false) + '<i class="unit">KTS</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.twentyFourHourVmcChange) + '">' + format(rank.twentyFourHourVmcChange, 2, 1) + '<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>---<i class="unit">KTS</i></div>' +
+                        '                                    <div class="white">---<i class="unit">KTS</i></div>' +
+                        '                                </div>' +
+                        '                            </div>' +
+                        '                            <div class="data-container">' +
+                        '                                <div class="grid-2 m-t m-b m-l">' +
+                        '                                    <div>' + format(rank.ptToPtHeading, 3, 0, false) + '<i class="unit">DEG</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.ptToPtHeadingChange) + '">' + format(rank.ptToPtHeadingChange, 3, 0) + '<i class="unit">DEG</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.fourHourHeading, 3, 0, false) + '<i class="unit">DEG</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.fourHourHeadingChange) + '">' + format(rank.fourHourHeadingChange, 3, 0) + '<i class="unit">DEG</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-b m-l">' +
+                        '                                    <div>' + format(rank.twentyFourHourHeading, 3, 0, false) + '<i class="unit">DEG</i></div>' +
+                        '                                    <div class="' + progressionColor(rank.twentyFourHourHeadingChange) + '">' + format(rank.twentyFourHourHeadingChange, 3, 0) + '<i class="unit">DEG</i></div>' +
+                        '                                </div>' +
+                        '                                <div class="grid-2 m-l">' +
+                        '                                    <div>---<i class="unit">DEG</i></div>' +
+                        '                                    <div class="white">---<i class="unit">DEG</i></div>' +
+                        '                                </div>' +
+                        '                            </div>' +
+                        '                        </div>' +
+                        '                        <div class="grid-3 m-t">' +
+                        '                            <div class="data-legend">SPEED 1H, 4H, 24H, ' + i18n('all') + '</div>' +
+                        '                            <div class="data-legend">VMG 1H, 4H, 24H, ' + i18n('all') + '</div>' +
+                        '                            <div class="data-legend">CAP 1H, 4H, 24H, ' + i18n('all') + '</div>' +
+                        '                        </div>' +
+                        '                    </div></a>';
+                    //First the left pane with the rankings
+
+                    $rankingContainer.insertAdjacentHTML('beforeend', template);
+
+                }
+            }
+        };
+
+        const load = (boatClass) => {
+            if (data.length > 0) {
+                update(boatClass);
+            } else {
+                marauders().tracks
+                    .then(result => {
+                        data = result;
+                        update(boatClass);
+                        //remove the "open in app" button on mobile
+                        if ($("#open-in-app")) {
+                            $("#open-in-app").style.display = "none";
+                        }
+                    })
+                    .catch(console.error);
+            }
+        };
+
+        window.load = load;
+
+        let hasHooks = false;
+
+        store.on('timestamp', () => {
+            load(currentClass);
+            console.log(store.get('timestamp'));
+        });
+
+        this.onopen = () => {
+            if (hasHooks) {
+                return;
+            }
+
+            load('IMOCA');
+
+            map.on('zoom', updateIconStyle);
+            map.on('zoomend', updateIconStyle);
+            map.on('viewreset', updateIconStyle);
+            hasHooks = true;
+        };
+
+        this.onclose = () => {
+            if (!hasHooks) {
+                return;
+            }
+        };
+
+        //reload every time the data are updated on the server side
+
+        window.setInterval(function () {
+            data = [];
+            console.log('updating data');
+            load(currentClass);
+        }, 30000);
+    </script>
+</plugin>

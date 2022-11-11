@@ -1,0 +1,38 @@
+{
+    "name": "windy-plugin-osc-rdr",
+    "version": "0.5.1",
+    "description": "Show the tracks and data of the Route du Rhum 2024",
+    "main": "dist/plugin.js",
+    "scripts": {
+        "start": "node ./compiler.js --build --watch --prompt --serve --transpile",
+        "start-dev": "node ./compiler.js --build --watch --serve --transpile",
+        "prepublishOnly": "node ./test/prepublish.js",
+        "test": "node ./test/prepublish.js"
+    },
+    "repository": {
+        "type": "npm/npm"
+    },
+    "author": "Julien Hatin",
+    "license": "UNLICENSED",
+    "dependencies": {
+        "@babel/core": "^7.1.2",
+        "@babel/preset-env": "^7.1.0",
+        "chokidar": "^2.0.4",
+        "colorette": "^1.0.6",
+        "commander": "^2.19.0",
+        "consola": "^1.4.4",
+        "decache": "^4.4.0",
+        "express": "^4.16.4",
+        "fs-extra": "^7.0.0",
+        "less": "^3.8.1",
+        "prompts": "^1.1.1",
+        "riot-compiler": "^3.5.1",
+        "ucfirst": "^1.0.0",
+        "windy-plugin-day-night": "^0.0.53"
+    },
+    "devDependencies": {
+        "eslint": "^8.1.0",
+        "eslint-plugin-html": "^6.2.0",
+        "prettier": "^2.4.1"
+    }
+}
